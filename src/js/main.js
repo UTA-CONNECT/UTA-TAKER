@@ -378,7 +378,7 @@ class Player{
     }
 
     onKeyDown(e) {
-        this.playerMove(this.x, this.y, e.key);
+        // this.playerMove(this.x, this.y, e.key);
     }
 }
 
