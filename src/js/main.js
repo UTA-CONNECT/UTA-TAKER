@@ -85,7 +85,9 @@ const map = {
     steps: 14,
     rocksBreakable: [],
     keys: [],
-    goals: []
+    goals: [],
+    stepsText: null,
+    player: null
 }
 
 const groundTiles = [
@@ -96,9 +98,11 @@ const groundTiles = [
 
 const mapContainer = new PIXI.Container();
 const itemContainer = new PIXI.Container();
+const hudContainer = new PIXI.Container();
 
 app.stage.addChild(mapContainer);
 app.stage.addChild(itemContainer);
+app.stage.addChild(hudContainer);
 
 const blackBoxGraphics = new PIXI.Graphics();
 blackBoxGraphics.beginFill(0x000000);
@@ -166,6 +170,33 @@ itemContainer.x = app.screen.width / 2;
 itemContainer.y = app.screen.height / 2;
 itemContainer.pivot.x = mapContainer.width / 2;
 itemContainer.pivot.y = mapContainer.height / 2;
+
+hudContainer.x = app.screen.width / 2;
+hudContainer.y = app.screen.height / 2;
+hudContainer.pivot.x = mapContainer.width / 2;
+hudContainer.pivot.y = mapContainer.height / 2;
+
+const style = new PIXI.TextStyle({
+    fontFamily: 'Arial',
+    fontSize: 36,
+    fontWeight: 'bold',
+    stroke: '#ffffff',
+    strokeThickness: 5,
+});
+const stepsText = new PIXI.Text(`STEPS: ${map.steps}`, style);
+stepsText.x = 0;
+stepsText.y = 0;
+map.stepsText = stepsText;
+hudContainer.addChild(stepsText);
+
+const player = new PIXI.AnimatedSprite(connechanAnimTextures);
+player.x = map.startX * 100;
+player.y = map.startY * 100;
+player.anchor.set(0);
+player.animationSpeed = 0.25;
+player.play();
+map.player = player;
+hudContainer.addChild(player);
 
 // Listen for animate update
 app.ticker.add((delta) => {
