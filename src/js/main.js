@@ -123,6 +123,8 @@ for (let i = 0; i < map.height; i ++) {
             ground.x = t * 100;
             ground.y = i * 100;
             ground.anchor.set(0);
+            ground.interactive = true;
+            ground.buttonMode = true;
             mapContainer.addChild(ground);
         }
 
@@ -189,14 +191,55 @@ stepsText.y = 0;
 map.stepsText = stepsText;
 hudContainer.addChild(stepsText);
 
-const player = new PIXI.AnimatedSprite(connechanAnimTextures);
-player.x = map.startX * 100;
-player.y = map.startY * 100;
-player.anchor.set(0);
-player.animationSpeed = 0.25;
-player.play();
+class Player {
+    constructor(x, y, textures, blockSize) {
+        this.sprite = new PIXI.AnimatedSprite(textures);
+        this.sprite.x = x * blockSize;
+        this.sprite.y = y * blockSize;
+        this.sprite.anchor.set(0);
+        this.sprite.animationSpeed = 0.25;
+        this.sprite.play();
+
+        this.x = x;
+        this.y = y;
+        this.blockSize = blockSize;
+
+        window.addEventListener('keydown', this.onKeyDown.bind(this))
+    }
+
+    onKeyDown(e) {
+        switch(e.key) {
+            case 'ArrowLeft':
+                if (this.x > 0 && map.tile[this.y][this.x - 1]) {
+                    this.x -= 1;
+                    this.sprite.x = this.x * this.blockSize;
+                }
+                break;
+            case 'ArrowUp':
+                if (this.y > 0 && map.tile[this.y - 1][this.x]) {
+                    this.y -= 1;
+                    this.sprite.y = this.y * this.blockSize;
+                }
+                break;
+            case 'ArrowRight':
+                if (this.x < map.width - 1 && map.tile[this.y][this.x + 1]) {
+                    this.x += 1;
+                    this.sprite.x = this.x * this.blockSize;
+                }
+                break;
+            case 'ArrowDown':
+                if (this.y < map.height - 1 && map.tile[this.y + 1][this.x]) {
+                    this.y += 1;
+                    this.sprite.y = this.y * this.blockSize;
+                }
+                break;
+        }
+    }
+}
+
+const player = new Player(map.startX, map.startY, connechanAnimTextures, 100)
 map.player = player;
-hudContainer.addChild(player);
+hudContainer.addChild(player.sprite);
 
 // Listen for animate update
 app.ticker.add((delta) => {
