@@ -160,15 +160,7 @@ class GroundTile extends GameObject {
     onClick(e) {
         console.log('asdf');
         if (map.player && Math.abs(map.player.x - this.x) + Math.abs(map.player.y - this.y) === 1 && map.item[this.y][this.x] == 0) {
-            if (this.x - 1 === map.player.x && this.y === map.player.y) { // current player is located leftside
-                map.player.playerMove(map.player.x, map.player.y, 'ArrowRight');
-            } else if (this.x === map.player.x && this.y - 1 === map.player.y) { // current player is located topside
-                map.player.playerMove(map.player.x, map.player.y, 'ArrowDown');
-            } else if (this.x + 1 === map.player.x && this.y === map.player.y) { // current player is located rightside
-                map.player.playerMove(map.player.x, map.player.y, 'ArrowLeft');
-            } else if (this.x === map.player.x && this.y + 1 === map.player.y) { // current player is located bottomside
-                map.player.playerMove(map.player.x, map.player.y, 'ArrowUp');
-            }
+            this.capture();
         }
     }
 }
