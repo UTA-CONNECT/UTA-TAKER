@@ -88,7 +88,8 @@ const map = {
     goals: [],
     stepsText: null,
     player: null,
-    shakeX: 0
+    shakeX: 0,
+    blockSize: 100,
 }
 
 const groundTiles = [
@@ -107,7 +108,7 @@ app.stage.addChild(hudContainer);
 
 const blackBoxGraphics = new PIXI.Graphics();
 blackBoxGraphics.beginFill(0x000000);
-blackBoxGraphics.drawRect(0, 0, 100, 100);
+blackBoxGraphics.drawRect(0, 0, map.blockSize, map.blockSize);
 blackBoxGraphics.endFill();
 const blackBoxTexture = app.renderer.generateTexture(blackBoxGraphics);
 
@@ -258,30 +259,30 @@ class ItemGoal extends GameObject {
 
 for (let i = 0; i < map.height; i ++) {
     for (let t = 0; t < map.width; t ++) { 
-        const ground = new BlackTile(t, i, blackBoxTexture, 100);
+        const ground = new BlackTile(t, i, blackBoxTexture, map.blockSize);
         mapContainer.addChild(ground.sprite);
         if (map.tile[i][t]) {
-            const ground = new GroundTile(t, i, groundTiles[getRandomInt(0, groundTiles.length)], 100);
+            const ground = new GroundTile(t, i, groundTiles[getRandomInt(0, groundTiles.length)], map.blockSize);
             mapContainer.addChild(ground.sprite);
         }
 
         switch(map.item[i][t]) {
             case ITEM_ROCK_BREAKABLE:
-                const rockBreakable = new RockBreakable(t, i, PIXI.Texture.from('src/images/partition/tile023.png'), 100);
+                const rockBreakable = new RockBreakable(t, i, PIXI.Texture.from('src/images/partition/tile023.png'), map.blockSize);
                 itemContainer.addChild(rockBreakable.sprite);
                 map.rocksBreakable.push(rockBreakable);
                 break;
             case ITEM_ROCK:
-                const rock = new Rock(t, i, PIXI.Texture.from('src/images/partition/rock.png'), 100);
+                const rock = new Rock(t, i, PIXI.Texture.from('src/images/partition/rock.png'), map.blockSize);
                 itemContainer.addChild(rock.sprite);
                 break;
             case ITEM_GOAL:
-                const goal = new ItemGoal(t, i, PIXI.Texture.from('src/images/partition/goal.png'), 100);
+                const goal = new ItemGoal(t, i, PIXI.Texture.from('src/images/partition/goal.png'), map.blockSize);
                 itemContainer.addChild(goal.sprite);
                 map.goals.push(goal);
                 break;
             case ITEM_KEY:
-                const key = new ItemKey(t, i, PIXI.Texture.from('src/images/partition/tile022.png'), 100);
+                const key = new ItemKey(t, i, PIXI.Texture.from('src/images/partition/tile022.png'), map.blockSize);
                 itemContainer.addChild(key.sprite);
                 map.keys.push(key);
                 break;
@@ -382,7 +383,7 @@ class Player{
     }
 }
 
-const player = new Player(map.startX, map.startY, connechanAnimTextures, 100)
+const player = new Player(map.startX, map.startY, connechanAnimTextures, map.blockSize)
 map.player = player;
 hudContainer.addChild(player.sprite);
 
