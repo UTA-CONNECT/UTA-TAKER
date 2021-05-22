@@ -82,7 +82,7 @@ const map = {
     startY: 4,
     width: 7,
     height: 7,
-    steps: 14,
+    steps: 11,
     rocksBreakable: [],
     keys: [],
     goals: [],
@@ -191,6 +191,41 @@ stepsText.y = 0;
 map.stepsText = stepsText;
 hudContainer.addChild(stepsText);
 
+function move(x, y, dir) {
+    switch(dir) {
+        case 'ArrowLeft':
+            if (x > 0 && map.tile[y][x - 1] && decreaseStepCounter()) {
+                x -= 1;
+            }
+            break;
+        case 'ArrowUp':
+            if (y > 0 && map.tile[y - 1][x] && decreaseStepCounter()) {
+                y -= 1;
+            }
+            break;
+        case 'ArrowRight':
+            if (x < map.width - 1 && map.tile[y][x + 1] && decreaseStepCounter()) {
+                x += 1;
+            }
+            break;
+        case 'ArrowDown':
+            if (y < map.height - 1 && map.tile[y + 1][x] && decreaseStepCounter()) {
+                y += 1;
+            }
+            break;
+    }
+    return [x, y];
+}
+
+function decreaseStepCounter() {
+    if (map.steps > 0) {
+        map.steps --;
+        map.stepsText.text = `STEPS: ${map.steps}`
+        return true;
+    }
+    return false;
+}
+
 class Player {
     constructor(x, y, textures, blockSize) {
         this.sprite = new PIXI.AnimatedSprite(textures);
@@ -208,32 +243,9 @@ class Player {
     }
 
     onKeyDown(e) {
-        switch(e.key) {
-            case 'ArrowLeft':
-                if (this.x > 0 && map.tile[this.y][this.x - 1]) {
-                    this.x -= 1;
-                    this.sprite.x = this.x * this.blockSize;
-                }
-                break;
-            case 'ArrowUp':
-                if (this.y > 0 && map.tile[this.y - 1][this.x]) {
-                    this.y -= 1;
-                    this.sprite.y = this.y * this.blockSize;
-                }
-                break;
-            case 'ArrowRight':
-                if (this.x < map.width - 1 && map.tile[this.y][this.x + 1]) {
-                    this.x += 1;
-                    this.sprite.x = this.x * this.blockSize;
-                }
-                break;
-            case 'ArrowDown':
-                if (this.y < map.height - 1 && map.tile[this.y + 1][this.x]) {
-                    this.y += 1;
-                    this.sprite.y = this.y * this.blockSize;
-                }
-                break;
-        }
+        [this.x, this.y] = move(this.x, this.y, e.key);
+        this.sprite.x = this.x * this.blockSize;
+        this.sprite.y = this.y * this.blockSize;
     }
 }
 
