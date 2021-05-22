@@ -54,7 +54,7 @@ const connechanAnimSprite = new PIXI.AnimatedSprite(connechanAnimTextures);
 connechanAnimSprite.x = 100;
 connechanAnimSprite.y = 100;
 connechanAnimSprite.anchor.set(0);
-connechanAnimSprite.animationSpeed = 2575 / 10000;
+connechanAnimSprite.animationSpeed = 2565 / 10000;
 connechanAnimSprite.play();
 app.stage.addChild(connechanAnimSprite);
 
@@ -232,7 +232,7 @@ class Player {
         this.sprite.x = x * blockSize;
         this.sprite.y = y * blockSize;
         this.sprite.anchor.set(0);
-        this.sprite.animationSpeed = 2575 / 10000;
+        this.sprite.animationSpeed = 2565 / 10000;
         this.sprite.play();
 
         this.x = x;
