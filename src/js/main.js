@@ -51,8 +51,8 @@ for (let i = 1; i <= 12; i ++) {
 }
 
 const connechanAnimSprite = new PIXI.AnimatedSprite(connechanAnimTextures);
-connechanAnimSprite.x = 100;
-connechanAnimSprite.y = 100;
+connechanAnimSprite.x = 0;
+connechanAnimSprite.y = 0;
 connechanAnimSprite.anchor.set(0);
 connechanAnimSprite.animationSpeed = 2565 / 10000;
 connechanAnimSprite.play();
@@ -295,6 +295,16 @@ hudContainer.x = app.screen.width / 2;
 hudContainer.y = app.screen.height / 2;
 hudContainer.pivot.x = mapContainer.width / 2;
 hudContainer.pivot.y = mapContainer.height / 2;
+
+if (window.innerWidth < mapContainer.width || window.innerHeight < mapContainer.height) {
+    const ratio = Math.min(window.innerWidth, window.innerHeight) / Math.max(mapContainer.width, mapContainer.height);
+    hudContainer.scale.x = ratio;
+    hudContainer.scale.y = ratio;
+    itemContainer.scale.x = ratio;
+    itemContainer.scale.y = ratio;
+    mapContainer.scale.x = ratio;
+    mapContainer.scale.y = ratio;
+}
 
 const style = new PIXI.TextStyle({
     fontFamily: 'Arial',
