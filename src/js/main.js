@@ -1,3 +1,8 @@
+const ITEM_ROCK_BREAKABLE = 2;
+const ITEM_ROCK = 3;
+const ITEM_GOAL = 4;
+const ITEM_KEY = 5;
+
 const app = new PIXI.Application({
     width: window.innerWidth, height: window.innerHeight, resizeTo: window, transparent: true, resolution: window.devicePixelRatio || 1,
 });
@@ -48,10 +53,119 @@ for (let i = 1; i <= 12; i ++) {
 const connechanAnimSprite = new PIXI.AnimatedSprite(connechanAnimTextures);
 connechanAnimSprite.x = 100;
 connechanAnimSprite.y = 100;
-connechanAnimSprite.anchor.set(0.5);
+connechanAnimSprite.anchor.set(0);
 connechanAnimSprite.animationSpeed = 0.25;
 connechanAnimSprite.play();
 app.stage.addChild(connechanAnimSprite);
+
+
+const map = {
+    tile:   [
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 1, 1, 1, 1, 1, 0],
+        [0, 1, 1, 1, 1, 1, 0],
+        [0, 1, 1, 1, 1, 1, 0],
+        [0, 1, 0, 0, 1, 1, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+            ],
+    item:   [
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 5, 3, 0, 4, 0, 0],
+        [0, 0, 2, 3, 2, 3, 0],
+        [0, 0, 2, 0, 2, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+    ],
+    startX: 1,
+    startY: 4,
+    width: 7,
+    height: 7,
+    steps: 14,
+    rocksBreakable: [],
+    keys: [],
+    goals: []
+}
+
+const groundTiles = [
+    PIXI.Texture.from('src/images/partition/ground_1.png'),
+    PIXI.Texture.from('src/images/partition/ground_2.png'),
+    PIXI.Texture.from('src/images/partition/ground_3.png'),
+]
+
+const mapContainer = new PIXI.Container();
+const itemContainer = new PIXI.Container();
+
+app.stage.addChild(mapContainer);
+app.stage.addChild(itemContainer);
+
+const blackBoxGraphics = new PIXI.Graphics();
+blackBoxGraphics.beginFill(0x000000);
+blackBoxGraphics.drawRect(0, 0, 100, 100);
+blackBoxGraphics.endFill();
+const blackBoxTexture = app.renderer.generateTexture(blackBoxGraphics);
+const blackBox = new PIXI.Sprite(blackBoxTexture);
+
+for (let i = 0; i < map.height; i ++) {
+    for (let t = 0; t < map.width; t ++) { 
+        const ground = new PIXI.Sprite(blackBoxTexture);
+        ground.x = t * 100;
+        ground.y = i * 100;
+        ground.anchor.set(0);
+        mapContainer.addChild(ground);
+        if (map.tile[i][t]) {
+            const ground = new PIXI.Sprite(groundTiles[getRandomInt(0, groundTiles.length)]);
+            ground.x = t * 100;
+            ground.y = i * 100;
+            ground.anchor.set(0);
+            mapContainer.addChild(ground);
+        }
+
+        switch(map.item[i][t]) {
+            case ITEM_ROCK_BREAKABLE:
+                const rockBreakable = new PIXI.Sprite(PIXI.Texture.from('src/images/partition/tile023.png'))
+                rockBreakable.x = t * 100;
+                rockBreakable.y = i * 100;
+                rockBreakable.anchor.set(0);
+                itemContainer.addChild(rockBreakable);
+                map.rocksBreakable.push(rockBreakable);
+                break;
+            case ITEM_ROCK:
+                const rock = new PIXI.Sprite(PIXI.Texture.from('src/images/partition/rock.png'))
+                rock.x = t * 100;
+                rock.y = i * 100;
+                rock.anchor.set(0);
+                itemContainer.addChild(rock);
+                break;
+            case ITEM_GOAL:
+                const goal = new PIXI.Sprite(PIXI.Texture.from('src/images/partition/goal.png'))
+                goal.x = t * 100;
+                goal.y = i * 100;
+                goal.anchor.set(0);
+                itemContainer.addChild(goal);
+                map.goals.push(goal);
+                break;
+            case ITEM_KEY:
+                const key = new PIXI.Sprite(PIXI.Texture.from('src/images/partition/tile022.png'))
+                key.x = t * 100;
+                key.y = i * 100;
+                key.anchor.set(0);
+                itemContainer.addChild(key);
+                map.keys.push(key);
+                break;
+        }
+    }
+}
+mapContainer.x = app.screen.width / 2;
+mapContainer.y = app.screen.height / 2;
+mapContainer.pivot.x = mapContainer.width / 2;
+mapContainer.pivot.y = mapContainer.height / 2;
+
+itemContainer.x = app.screen.width / 2;
+itemContainer.y = app.screen.height / 2;
+itemContainer.pivot.x = mapContainer.width / 2;
+itemContainer.pivot.y = mapContainer.height / 2;
 
 // Listen for animate update
 app.ticker.add((delta) => {
@@ -64,3 +178,8 @@ app.ticker.add((delta) => {
 //     app.view.style.width = window.innerHeight + 'px';
 //     app.view.style.height = window.innerHeight + 'px';
 // })
+function getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min)) + min; //최댓값은 제외, 최솟값은 포함
+  }
