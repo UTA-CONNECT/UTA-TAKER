@@ -87,7 +87,8 @@ const map = {
     keys: [],
     goals: [],
     stepsText: null,
-    player: null
+    player: null,
+    shakeX: 0
 }
 
 const groundTiles = [
@@ -195,6 +196,7 @@ class RockBreakable extends Rock {
 
     break() {
         if(decreaseStepCounter()) {
+            map.shakeX = 8;
             this.health --;
             if (this.health <= 0) {
                 map.item[this.y][this.x] = 0;
@@ -241,7 +243,7 @@ class ItemGoal extends GameObject {
     onClick(e) {
         console.log('[ItemGoal] [onClick]', e)
         if (map.player && Math.abs(map.player.x - this.x) + Math.abs(map.player.y - this.y) === 1 && map.item[this.y][this.x] === ITEM_GOAL) {
-            if (this.capture() && map.player.key > 0) {
+            if (map.player.key > 0 && this.capture()) {
                 this.takeIt();
             }
         }
@@ -384,11 +386,20 @@ const player = new Player(map.startX, map.startY, connechanAnimTextures, 100)
 map.player = player;
 hudContainer.addChild(player.sprite);
 
+
 // Listen for animate update
 app.ticker.add((delta) => {
     // rotate the container!
     // use delta to create frame-independent transform
     // container.rotation -= 0.01 * delta;
+
+    mapContainer.x = Math.sin(map.shakeX) * 8 + app.screen.width / 2;
+    itemContainer.x = Math.sin(map.shakeX) * 8 + app.screen.width / 2;
+    hudContainer.x = Math.sin(map.shakeX) * 8 + app.screen.width / 2;
+
+    if (map.shakeX > 0) {
+        map.shakeX += (0 - delta);
+    }
 });
 
 // window.addEventListener('resize', () => {
