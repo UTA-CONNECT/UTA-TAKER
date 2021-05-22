@@ -82,7 +82,7 @@ const map = {
     startY: 4,
     width: 7,
     height: 7,
-    steps: 11,
+    steps: 13,
     rocksBreakable: [],
     keys: [],
     goals: [],
@@ -109,55 +109,178 @@ blackBoxGraphics.beginFill(0x000000);
 blackBoxGraphics.drawRect(0, 0, 100, 100);
 blackBoxGraphics.endFill();
 const blackBoxTexture = app.renderer.generateTexture(blackBoxGraphics);
-const blackBox = new PIXI.Sprite(blackBoxTexture);
+
+class GameObject {
+    constructor(x, y, texture, blockSize) {
+        this.sprite = new PIXI.Sprite(texture)
+        this.sprite.x = x * blockSize;
+        this.sprite.y = y * blockSize;
+        this.sprite.anchor.set(0);
+        
+        this.blockSize = blockSize;
+        this.x = x;
+        this.y = y;
+    }
+
+    capture() {
+        let [x, y] = [this.x, this.y];
+        if (this.x - 1 === map.player.x && this.y === map.player.y) { // current player is located leftside
+            [x, y] = map.player.playerMove(map.player.x, map.player.y, 'ArrowRight');
+        } else if (this.x === map.player.x && this.y - 1 === map.player.y) { // current player is located topside
+            [x, y] = map.player.playerMove(map.player.x, map.player.y, 'ArrowDown');
+        } else if (this.x + 1 === map.player.x && this.y === map.player.y) { // current player is located rightside
+            [x, y] = map.player.playerMove(map.player.x, map.player.y, 'ArrowLeft');
+        } else if (this.x === map.player.x && this.y + 1 === map.player.y) { // current player is located bottomside
+            [x, y] = map.player.playerMove(map.player.x, map.player.y, 'ArrowUp');
+        }
+        if(x !== this.x || y !== this.y) {
+            return false;
+        }
+        return true;
+    }
+}
+
+class BlackTile extends GameObject{
+    constructor(x, y, texture, blockSize) {
+        super(x, y, texture, blockSize);
+    }
+}
+
+class GroundTile extends GameObject {
+    constructor(x, y, texture, blockSize) {
+        super(x, y, texture, blockSize);
+        this.sprite.interactive = true;
+        this.sprite.buttonMode = true;
+
+        this.sprite.on('pointerdown', this.onClick.bind(this));
+    }
+
+    onClick(e) {
+        console.log('asdf');
+        if (map.player && Math.abs(map.player.x - this.x) + Math.abs(map.player.y - this.y) === 1 && map.item[this.y][this.x] == 0) {
+            if (this.x - 1 === map.player.x && this.y === map.player.y) { // current player is located leftside
+                map.player.playerMove(map.player.x, map.player.y, 'ArrowRight');
+            } else if (this.x === map.player.x && this.y - 1 === map.player.y) { // current player is located topside
+                map.player.playerMove(map.player.x, map.player.y, 'ArrowDown');
+            } else if (this.x + 1 === map.player.x && this.y === map.player.y) { // current player is located rightside
+                map.player.playerMove(map.player.x, map.player.y, 'ArrowLeft');
+            } else if (this.x === map.player.x && this.y + 1 === map.player.y) { // current player is located bottomside
+                map.player.playerMove(map.player.x, map.player.y, 'ArrowUp');
+            }
+        }
+    }
+}
+
+class Rock extends GameObject{
+    constructor(x, y, texture, blockSize) {
+        super(x, y, texture, blockSize);
+    }
+}
+
+class RockBreakable extends Rock {
+    constructor(x, y, texture, blockSize) {
+        super(x, y, texture, blockSize);
+        this.health = 1;
+        this.sprite.interactive = true;
+        this.sprite.buttonMode = true;
+        this.sprite.on('pointerdown', this.onClick.bind(this));
+    }
+
+    onClick(e) {
+        console.log('[RockBreakable] [onClick]', e)
+        if (map.player && Math.abs(map.player.x - this.x) + Math.abs(map.player.y - this.y) === 1 && map.item[this.y][this.x] === ITEM_ROCK_BREAKABLE) {
+            this.break();
+        }
+    }
+
+    break() {
+        if(decreaseStepCounter()) {
+            this.health --;
+            if (this.health <= 0) {
+                map.item[this.y][this.x] = 0;
+                this.sprite.destroy();
+            }
+        }
+    }
+}
+
+class ItemKey extends GameObject {
+    constructor(x, y, texture, blockSize) {
+        super(x, y, texture, blockSize);
+        this.sprite.interactive = true;
+        this.sprite.buttonMode = true;
+
+        this.sprite.on('pointerdown', this.onClick.bind(this));
+    }
+
+    onClick(e) {
+        console.log('[ItemKey] [onClick]', e)
+        if (map.player && Math.abs(map.player.x - this.x) + Math.abs(map.player.y - this.y) === 1 && map.item[this.y][this.x] === ITEM_KEY) {
+            if (this.capture()) {
+                this.takeIt();
+            }
+        }
+    }
+
+    takeIt() {
+        map.item[this.y][this.x] = 0;
+        map.player.key ++;
+        this.sprite.destroy();
+    }
+}
+
+class ItemGoal extends GameObject {
+    constructor(x, y, texture, blockSize) {
+        super(x, y, texture, blockSize);
+        this.sprite.interactive = true;
+        this.sprite.buttonMode = true;
+
+        this.sprite.on('pointerdown', this.onClick.bind(this));
+    }
+
+    onClick(e) {
+        console.log('[ItemGoal] [onClick]', e)
+        if (map.player && Math.abs(map.player.x - this.x) + Math.abs(map.player.y - this.y) === 1 && map.item[this.y][this.x] === ITEM_GOAL) {
+            if (this.capture() && map.player.key > 0) {
+                this.takeIt();
+            }
+        }
+    }
+
+    takeIt() {
+        map.item[this.y][this.x] = 0;
+        map.player.key --;
+        this.sprite.destroy();
+    }
+}
 
 for (let i = 0; i < map.height; i ++) {
     for (let t = 0; t < map.width; t ++) { 
-        const ground = new PIXI.Sprite(blackBoxTexture);
-        ground.x = t * 100;
-        ground.y = i * 100;
-        ground.anchor.set(0);
-        mapContainer.addChild(ground);
+        const ground = new BlackTile(t, i, blackBoxTexture, 100);
+        mapContainer.addChild(ground.sprite);
         if (map.tile[i][t]) {
-            const ground = new PIXI.Sprite(groundTiles[getRandomInt(0, groundTiles.length)]);
-            ground.x = t * 100;
-            ground.y = i * 100;
-            ground.anchor.set(0);
-            ground.interactive = true;
-            ground.buttonMode = true;
-            mapContainer.addChild(ground);
+            const ground = new GroundTile(t, i, groundTiles[getRandomInt(0, groundTiles.length)], 100);
+            mapContainer.addChild(ground.sprite);
         }
 
         switch(map.item[i][t]) {
             case ITEM_ROCK_BREAKABLE:
-                const rockBreakable = new PIXI.Sprite(PIXI.Texture.from('src/images/partition/tile023.png'))
-                rockBreakable.x = t * 100;
-                rockBreakable.y = i * 100;
-                rockBreakable.anchor.set(0);
-                itemContainer.addChild(rockBreakable);
+                const rockBreakable = new RockBreakable(t, i, PIXI.Texture.from('src/images/partition/tile023.png'), 100);
+                itemContainer.addChild(rockBreakable.sprite);
                 map.rocksBreakable.push(rockBreakable);
                 break;
             case ITEM_ROCK:
-                const rock = new PIXI.Sprite(PIXI.Texture.from('src/images/partition/rock.png'))
-                rock.x = t * 100;
-                rock.y = i * 100;
-                rock.anchor.set(0);
-                itemContainer.addChild(rock);
+                const rock = new Rock(t, i, PIXI.Texture.from('src/images/partition/rock.png'), 100);
+                itemContainer.addChild(rock.sprite);
                 break;
             case ITEM_GOAL:
-                const goal = new PIXI.Sprite(PIXI.Texture.from('src/images/partition/goal.png'))
-                goal.x = t * 100;
-                goal.y = i * 100;
-                goal.anchor.set(0);
-                itemContainer.addChild(goal);
+                const goal = new ItemGoal(t, i, PIXI.Texture.from('src/images/partition/goal.png'), 100);
+                itemContainer.addChild(goal.sprite);
                 map.goals.push(goal);
                 break;
             case ITEM_KEY:
-                const key = new PIXI.Sprite(PIXI.Texture.from('src/images/partition/tile022.png'))
-                key.x = t * 100;
-                key.y = i * 100;
-                key.anchor.set(0);
-                itemContainer.addChild(key);
+                const key = new ItemKey(t, i, PIXI.Texture.from('src/images/partition/tile022.png'), 100);
+                itemContainer.addChild(key.sprite);
                 map.keys.push(key);
                 break;
         }
@@ -192,6 +315,7 @@ map.stepsText = stepsText;
 hudContainer.addChild(stepsText);
 
 function move(x, y, dir) {
+    console.log('move', x, y, dir)
     switch(dir) {
         case 'ArrowLeft':
             if (x > 0 && map.tile[y][x - 1] && decreaseStepCounter()) {
@@ -218,6 +342,7 @@ function move(x, y, dir) {
 }
 
 function decreaseStepCounter() {
+    console.log('map.steps', map.steps)
     if (map.steps > 0) {
         map.steps --;
         map.stepsText.text = `STEPS: ${map.steps}`
@@ -226,7 +351,7 @@ function decreaseStepCounter() {
     return false;
 }
 
-class Player {
+class Player{
     constructor(x, y, textures, blockSize) {
         this.sprite = new PIXI.AnimatedSprite(textures);
         this.sprite.x = x * blockSize;
@@ -238,14 +363,20 @@ class Player {
         this.x = x;
         this.y = y;
         this.blockSize = blockSize;
+        this.key = 0;
 
         window.addEventListener('keydown', this.onKeyDown.bind(this))
     }
 
-    onKeyDown(e) {
-        [this.x, this.y] = move(this.x, this.y, e.key);
+    playerMove(x, y, dirKey) {
+        [this.x, this.y] = move(x, y, dirKey);
         this.sprite.x = this.x * this.blockSize;
         this.sprite.y = this.y * this.blockSize;
+        return [this.x, this.y];
+    }
+
+    onKeyDown(e) {
+        this.playerMove(this.x, this.y, e.key);
     }
 }
 
