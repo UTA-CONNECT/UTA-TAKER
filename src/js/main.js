@@ -400,7 +400,7 @@ app.ticker.add((delta) => {
     itemContainer.x = Math.sin(map.shakeX) * 8 + app.screen.width / 2;
     hudContainer.x = Math.sin(map.shakeX) * 8 + app.screen.width / 2;
 
-    if (map.shakeX > 0) {
+    if (map.shakeX != 0) {
         map.shakeX += (0 - delta);
     }
 });
