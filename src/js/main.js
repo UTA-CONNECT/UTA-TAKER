@@ -20,8 +20,8 @@ app.stage.addChild(container);
 //     container.addChild(bunny);
 // }
 const connechan_1_sprite = PIXI.Texture.from('src/images/partition/connechan_1.png');
-for (let i = 0; i < app.screen.width; i += 50) {
-    for (let t = 0; t < app.screen.height; t += 50) {
+for (let i = -50; i < app.screen.width + 50; i += 50) {
+    for (let t = -50; t < app.screen.height + 50; t += 50) {
         const conneChan = new PIXI.Sprite(connechan_1_sprite);
         conneChan.x = i;
         conneChan.y = t;
