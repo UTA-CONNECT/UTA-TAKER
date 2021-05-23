@@ -29,14 +29,14 @@ window.onload = () => {
     //     container.addChild(bunny);
     // }
     const connechan_1_sprite = PIXI.Texture.from('src/images/partition/connechan_1.png');
-    for (let i = -50; i < app.screen.width + 50; i += 50) {
-        for (let t = -50; t < app.screen.height + 50; t += 50) {
-            const conneChan = new PIXI.Sprite(connechan_1_sprite);
-            conneChan.x = i;
-            conneChan.y = t;
-            container.addChild(conneChan);
-        }
-    }
+    // for (let i = -50; i < app.screen.width + 50; i += 50) {
+    //     for (let t = -50; t < app.screen.height + 50; t += 50) {
+    //         const conneChan = new PIXI.Sprite(connechan_1_sprite);
+    //         conneChan.x = i;
+    //         conneChan.y = t;
+    //         container.addChild(conneChan);
+    //     }
+    // }
     
     
     console.log('w x h', app.screen.width, app.screen.height)
@@ -114,7 +114,7 @@ window.onload = () => {
     app.stage.addChild(storyContainer);
     
     const blackBoxGraphics = new PIXI.Graphics();
-    blackBoxGraphics.beginFill(0x000000);
+    blackBoxGraphics.beginFill(0xDE4D86);
     blackBoxGraphics.drawRect(0, 0, map.blockSize, map.blockSize);
     blackBoxGraphics.endFill();
     const blackBoxTexture = app.renderer.generateTexture(blackBoxGraphics);
