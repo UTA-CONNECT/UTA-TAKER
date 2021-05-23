@@ -9,6 +9,7 @@ window.onload = () => {
     
     const app = new PIXI.Application({
         width: window.innerWidth, height: window.innerHeight, resizeTo: window, transparent: true, resolution: window.devicePixelRatio || 1,
+        antialias:true
     });
     console.log('window.devicePixelRatio', window.devicePixelRatio);
     document.body.appendChild(app.view);
