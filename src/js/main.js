@@ -3,6 +3,8 @@ const ITEM_ROCK = 3;
 const ITEM_GOAL = 4;
 const ITEM_KEY = 5;
 
+PIXI.settings.FAIL_IF_MAJOR_PERFORMANCE_CAVEAT = false;
+
 const app = new PIXI.Application({
     width: window.innerWidth, height: window.innerHeight, resizeTo: window, transparent: true, resolution: window.devicePixelRatio || 1,
 });
