@@ -90,6 +90,7 @@ const map = {
     player: null,
     shakeX: 0,
     blockSize: 100,
+    goal: false
 }
 
 const groundTiles = [
@@ -101,10 +102,12 @@ const groundTiles = [
 const mapContainer = new PIXI.Container();
 const itemContainer = new PIXI.Container();
 const hudContainer = new PIXI.Container();
+const storyContainer = new PIXI.Container();
 
 app.stage.addChild(mapContainer);
 app.stage.addChild(itemContainer);
 app.stage.addChild(hudContainer);
+app.stage.addChild(storyContainer);
 
 const blackBoxGraphics = new PIXI.Graphics();
 blackBoxGraphics.beginFill(0x000000);
@@ -244,8 +247,13 @@ class ItemGoal extends GameObject {
 
     takeIt() {
         map.item[this.y][this.x] = 0;
+        map.goal = true;
         map.player.key --;
         this.sprite.destroy();
+
+        setTimeout(() => {
+            startStory();
+        }, 800);
     }
 }
 
@@ -296,8 +304,15 @@ hudContainer.y = app.screen.height / 2;
 hudContainer.pivot.x = mapContainer.width / 2;
 hudContainer.pivot.y = mapContainer.height / 2;
 
+storyContainer.x = app.screen.width / 2;
+storyContainer.y = app.screen.height / 2;
+storyContainer.pivot.x = mapContainer.width / 2;
+storyContainer.pivot.y = mapContainer.height / 2;
+
 if (window.innerWidth < mapContainer.width || window.innerHeight < mapContainer.height) {
     const ratio = Math.min(window.innerWidth, window.innerHeight) / Math.max(mapContainer.width, mapContainer.height);
+    storyContainer.scale.x = ratio;
+    storyContainer.scale.y = ratio;
     hudContainer.scale.x = ratio;
     hudContainer.scale.y = ratio;
     itemContainer.scale.x = ratio;
@@ -389,6 +404,137 @@ const player = new Player(map.startX, map.startY, connechanAnimTextures, map.blo
 map.player = player;
 hudContainer.addChild(player.sprite);
 
+class StoryCharactor {
+    constructor(x, y, textures) {
+        this.x = x;
+        this.y = y;
+        this.w = 800;
+        this.h = 1132;
+        this.sprites = [];
+        textures.forEach(texture => {
+            const sprite = new PIXI.Sprite(texture)
+            sprite.anchor.set(0);
+            sprite.x = 0;
+            sprite.y = 0;
+            this.sprites.push(sprite);
+        })
+    }
+
+    addToStage(stage) {
+        this.stage = stage;
+        this.sprites.forEach(sprite => {
+            stage.addChild(sprite);
+        });
+    }
+
+    show(index) {
+        this.sprites.forEach(sprite => sprite.alpha = 0)
+        const sprite = this.sprites[index];
+        const ratio = Math.min(map.width * map.blockSize, map.height * map.blockSize) / Math.max(this.w, this.h);
+        // console.log(map.width * map.blockSize, map.height * map.blockSize, ratio, sprite.width, sprite.height);
+        sprite.scale.y = ratio;
+        sprite.scale.x = ratio;
+        sprite.x = (map.width * map.blockSize - this.w * ratio) / 2;
+        sprite.alpha = 1;
+    }
+}
+
+class StoryBackground extends GameObject {
+    constructor(x, y, texture, blockSize) {
+        super(x, y, texture, blockSize);
+        this.sprite.alpha = 0;
+    }
+
+    show() {
+        this.sprite.alpha = 1;
+    }
+
+    hide() {
+        this.sprite.alpha = 0;
+    }
+}
+const blackBg = new PIXI.Graphics();
+blackBg.beginFill(0x000000);
+blackBg.drawRect(0, 0, map.blockSize * map.width, map.blockSize * map.height);
+blackBg.endFill();
+const blackTexture = app.renderer.generateTexture(blackBg);
+const storyBg = new StoryBackground(0, 0, blackTexture, map.blockSize * map.width);
+storyBg.show();
+
+const conneChanStory = new StoryCharactor(0, 0, [
+    PIXI.Texture.from('src/images/story/connechan_confusing.png'),
+    PIXI.Texture.from('src/images/story/connechan_normal.png'),
+    PIXI.Texture.from('src/images/story/connechan_yandre.png')
+])
+conneChanStory.show(1);
+
+const blackBar = new PIXI.Graphics();
+blackBar.beginFill(0x000000);
+blackBar.drawRect(0, 0, map.blockSize * map.width, map.blockSize * map.height / 5 * 2);
+blackBar.endFill();
+const blackBarTexture = app.renderer.generateTexture(blackBar);
+const storyBlackBar = new StoryBackground(0, map.blockSize * map.height / 5 * 3, blackBarTexture, 1);
+storyBlackBar.show();
+
+const styleStory = new PIXI.TextStyle({
+    fontFamily: 'Arial',
+    fontSize: 24,
+    fontWeight: 'bold',
+    stroke: '#ffffff',
+    strokeThickness: 5,
+});
+const storyTxt = new PIXI.Text(`오뎅국물에 사이다 섞어 마시는거 나름 괜찮다구?`, styleStory);
+storyTxt.x = (map.blockSize * map.width - storyTxt.width) / 2;
+storyTxt.y = map.blockSize * map.height / 5 * 3 + map.blockSize * map.height / 5 * 2 / 5;
+
+const styleSelection = new PIXI.TextStyle({
+    fontFamily: 'Arial',
+    fontSize: 20,
+    fontWeight: 'bold',
+    stroke: '#ffffff',
+    strokeThickness: 5,
+});
+const storySelection1Txt = new PIXI.Text(`왜 그런 짓을...`, styleSelection);
+storySelection1Txt.x = (map.blockSize * map.width - storySelection1Txt.width) / 2;
+storySelection1Txt.y = map.blockSize * map.height / 5 * 3 + map.blockSize * map.height / 5 * 2 / 5 * 2;
+storySelection1Txt.interactive = true;
+storySelection1Txt.buttonMode = true;
+storySelection1Txt.on('pointerdown', () => {
+    conneChanStory.show(0);
+    storyTxt.text = "정말이라니깐, 왜 모르는거야"
+    storySelection1Txt.text = "";
+    storySelection2Txt.text = "Bad choice";
+    storyTxt.x = (map.blockSize * map.width - storyTxt.width) / 2;
+    storySelection2Txt.x = (map.blockSize * map.width - storySelection2Txt.width) / 2;
+    storySelection2Txt.interactive = false;
+    storySelection2Txt.buttonMode = false;
+});
+
+const storySelection2Txt = new PIXI.Text(`응, 물냉면 땡기는 맛 이지`, styleSelection);
+storySelection2Txt.x = (map.blockSize * map.width - storySelection2Txt.width) / 2;
+storySelection2Txt.y = map.blockSize * map.height / 5 * 3 + map.blockSize * map.height / 5 * 2 / 5 * 3;
+storySelection2Txt.interactive = true;
+storySelection2Txt.buttonMode = true;
+storySelection2Txt.on('pointerdown', () => {
+    conneChanStory.show(2);
+    storyTxt.text = "흥미로워. 너도 보통 놈이 아니구나?"
+    storySelection1Txt.text = "";
+    storySelection2Txt.text = "Success";
+    storyTxt.x = (map.blockSize * map.width - storyTxt.width) / 2;
+    storySelection2Txt.x = (map.blockSize * map.width - storySelection2Txt.width) / 2;
+    storySelection2Txt.interactive = false;
+    storySelection2Txt.buttonMode = false;
+});
+
+function startStory() {
+    hudContainer.addChild(storyBg.sprite);
+    conneChanStory.addToStage(hudContainer);
+    hudContainer.addChild(storyBlackBar.sprite);
+    hudContainer.addChild(storyTxt);
+    hudContainer.addChild(storySelection1Txt);
+    hudContainer.addChild(storySelection2Txt);
+}
+// startStory();
 
 // Listen for animate update
 app.ticker.add((delta) => {
