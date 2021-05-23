@@ -257,7 +257,7 @@ window.onload = () => {
     
             setTimeout(() => {
                 startStory();
-            }, 800);
+            }, 650);
         }
     }
     
@@ -458,7 +458,7 @@ window.onload = () => {
         }
     }
     const blackBg = new PIXI.Graphics();
-    blackBg.beginFill(0x000000);
+    blackBg.beginFill(0xDE4D86);
     blackBg.drawRect(0, 0, map.blockSize * map.width, map.blockSize * map.height);
     blackBg.endFill();
     const blackTexture = app.renderer.generateTexture(blackBg);
@@ -473,7 +473,7 @@ window.onload = () => {
     conneChanStory.show(1);
     
     const blackBar = new PIXI.Graphics();
-    blackBar.beginFill(0x000000);
+    blackBar.beginFill(0x64113F);
     blackBar.drawRect(0, 0, map.blockSize * map.width, map.blockSize * map.height / 5 * 2);
     blackBar.endFill();
     const blackBarTexture = app.renderer.generateTexture(blackBar);
